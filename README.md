@@ -7,7 +7,7 @@
 git clone https://github.com/bloodymosquito/tda-retinal-cells
 ```
 
-- Create a virtual environment
+- Create a virtual environment (optional)
 ```bash
 virtualenv -p python3 <location_of_the_new_virtualenv>
 source <location_of_the_new_virtualenv>/bin/activate

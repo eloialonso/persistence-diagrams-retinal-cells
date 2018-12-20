@@ -1,6 +1,6 @@
 # Topological data analysis to classify pixels in images of retinal cells
 
-## Installation of the requirements
+## Installation
 
 - Clone the project
 ```bash

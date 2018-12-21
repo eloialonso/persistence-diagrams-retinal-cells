@@ -1,4 +1,11 @@
-# Topological data analysis to classify pixels in images of retinal cells
+<h1 align="center">
+  Topological Data Analysis to classify pixels in images of retinal cells
+</h1>
+
+<p align="center">
+  <img alt="Persistence diagram" src="persistence.gif">
+</p>
+
 
 ## Installation
 

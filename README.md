@@ -29,7 +29,7 @@ To do so, we consider the pixels of a ring (blue) centered on our point of inter
 
 
 
-Let *f* be the function plotted on the left (mapping angle to intensity). For a given intensity *x* in *[0, 255], we consider the **connected components** of the following set:
+Let *f* be the function plotted on the left (mapping angle to intensity). For a given intensity *x* in *[0, 255]*, we consider the **connected components** of the following set:
 
 <img src="docs/eq_preimage.svg" alt=""/>
 

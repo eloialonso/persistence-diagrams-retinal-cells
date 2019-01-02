@@ -21,11 +21,11 @@ In images of retinal cells, we use persistence diagrams to classify a given pixe
 - if the intensity in the ring has three or more major peaks, our point belongs to a corner
 - else, our point belongs to background.
 
-**Difficulty**: given the intensity in the ring, define the concept of *major* peak of intensity, in order to distinguish them from the noisy peaks and to count them.
+**Difficulty**: define the idea of a *major* peak of intensity (versus a *noisy* peak).
 
 **Approach**: use *persistence* to quantitatively differentiate between noisy peaks and major peaks.   
 
-### Persistence Diagram intuition
+## Persistence Diagram
 
 In the ring, consider the mapping *angle -> intensity* as a mountain relief, where the angle is the horizontal position and the intensity is the altitude. Fill this landscape with water until the highest mountain is covered up. Then, slowly empty the water and keep track of two events:
 
@@ -77,4 +77,6 @@ python main.py
 This will display a default image of cells. Select a point to run the analysis on. 
 
 ### Options
+
+It is possible to change the default image, the default values of the hyper parameters (shape of the ring, minimum persistence to separate noisy peaks vs. major peaks etc.). Enter `python main.py h` for details.
 

@@ -1,13 +1,21 @@
 <h1 align="center">
-  Topological Data Analysis to classify pixels in images of retinal cells
+  Topological Data Analysis for corner detection
 </h1>
+
+Persistence diagrams to classify pixels as corners, edges, etc. in images of retinal cells.
+
+## Principle
+
+
 
 <p align="center">
   <img alt="Persistence diagram" src="persistence.gif">
 </p>
 
 
-## Installation
+## Getting started
+
+### Installation
 
 - Clone the project
 ```bash
@@ -25,3 +33,14 @@ source <location_of_the_new_virtualenv>/bin/activate
 cd tda-retinal-cells
 pip install -r requirements.txt
 ```
+
+### Basic use
+
+```bash
+python main.py
+```
+
+This will display a default image of cells. Select a point to run the analysis on. 
+
+### Options
+

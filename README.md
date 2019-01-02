@@ -9,7 +9,7 @@ Persistence diagrams to classify pixels as corners, edges, etc. in images of ret
 
 
 <p align="center">
-  <img alt="Persistence diagram" src="persistence.gif">
+  <img alt="Persistence diagram" src="docs/persistence.gif">
 </p>
 
 

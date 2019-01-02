@@ -22,7 +22,7 @@ from utils import get_quantile, create_ring_mask, apply_mask, plot_img, simple_p
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="TODO", formatter_class=argparse.RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(description="tda for corner detection in retinal cells images", formatter_class=argparse.RawTextHelpFormatter)
 
     # out folder
     parser.add_argument("--outf", default="./out", type=str,

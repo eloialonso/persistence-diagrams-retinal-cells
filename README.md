@@ -18,12 +18,22 @@ In images of retinal cells, we use persistence diagrams to classify a given pixe
 
 To do so, we consider the pixels of a ring (blue) centered on our point of interest. 
 
+### Building the persistence diagram
+
 <p align="center">
   <img alt="Intensity in the ring and corresponding persistence diagram" src="docs/persistence_diagram.png">
 </p>
 
-*Left*: the intensity of the pixels in the ring as a function of their angular position in the ring. 
+*Left*: the intensity of the pixels in the ring as a function of their angle in the ring. 
 *Right*: the corresponding persistence diagram.
+
+
+
+Let *f* be the function plotted on the left (mapping angle to intensity). For a given intensity *x* in *[0, 255], we consider the **connected components** of the following set:
+
+<img src="docs/eq_preimage.svg" alt=""/>
+
+Then, we vary the intensity *x* from 255 down to 0, tracking the connected components at each step, recording their birth and their death. The persistence diagram is the graphical representation of a connected component's life: each point corresponds to a connected component, with coordinates [intensity of birth, intensity of death].
 
 
 ## Getting started

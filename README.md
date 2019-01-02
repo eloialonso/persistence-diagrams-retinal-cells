@@ -16,7 +16,14 @@ In images of retinal cells, we use persistence diagrams to classify a given pixe
 
 **Goal**: classify the selected pixel (red) as belonging to a *corner*, an *edge* or simply *background*. 
 
-To do so, we consider the pixels of a ring (blue) centered on our point of interest. 
+**How**: we consider the pixels of a ring (blue) centered on our point of interest, and use the following set of rules: 
+- if the intensity in the ring has two main peaks, then our point belongs to an edge
+- if the intensity in the ring has three or more major peaks, our point belongs to a corner
+- else, our point belongs to background.
+
+**Difficulty**: given the intensity in the ring, define the concept of *major* peak of intensity, in order to distinguish them from the noisy peaks and to count them.
+
+**Approach**: in the ring, consider the mapping angle -> intensity as a moutain relief. Then, use *persistence* to quantitatively differentiate between noisy peaks and major peaks.   
 
 ### Building the persistence diagram
 
@@ -27,13 +34,14 @@ To do so, we consider the pixels of a ring (blue) centered on our point of inter
 *Left*: the intensity of the pixels in the ring as a function of their angle in the ring. 
 *Right*: the corresponding persistence diagram.
 
-
-
 Let *f* be the function plotted on the left (mapping angle to intensity). For a given intensity *x* in *[0, 255]*, we consider the **connected components** of the following set:
 
 <img src="docs/eq_preimage.svg" alt=""/>
 
 Then, we vary the intensity *x* from 255 down to 0, tracking the connected components at each step, recording their birth and their death. The persistence diagram is the graphical representation of a connected component's life: each point corresponds to a connected component, with coordinates [intensity of birth, intensity of death].
+
+### Analysis of the diagram
+
 
 
 ## Getting started

@@ -2,7 +2,8 @@
 # coding: utf-8
 
 """
-TODO
+We define here Point and ConnectedComponent. This second class contains 
+the methods used during the water descent (to add new points to an existing cc, and merge two cc). 
 """
 
 class Point:
@@ -24,11 +25,11 @@ class Point:
         return "({}, {})".format(self.x, self.y)
 
 
-class ConnectedComponent: # TODO
+class ConnectedComponent:
 
     # Class attributes
-    connected_components = []   # to store all the created instances
-    history = {}                # to store TODO
+    connected_components = []   # to store all the created connected components
+    history = {}                # to store the birth/death events of all connected components
 
     def __init__(self, peak=Point(), x_left=0, x_right=0, members=[]):
         r"""Connected component
@@ -63,9 +64,8 @@ class ConnectedComponent: # TODO
         cls.history = {}
     
     def add_member(self, point, point_close_left=False, point_close_right=False, on_left=False, on_right=False):
-        r"""
-        TODO
-        """
+        r"""Add a new point to self, and update accordingly the attributes of self"""
+        
         # add the new point to the list of members of the cc
         self.members.append(point)
         self.members = list(set(self.members))

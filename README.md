@@ -78,5 +78,5 @@ This will display a default image of cells. Select a point to run the analysis o
 
 ### Options
 
-It is possible to change the default image, the default values of the hyper parameters (shape of the ring, minimum persistence to separate noisy peaks vs. major peaks etc.). Enter `python main.py h` for details.
+It is possible to change the default image, the default values of the hyper parameters (shape of the ring, minimum persistence to separate noisy peaks vs. major peaks etc.). Enter `python main.py -h` for details.
 

@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-TODO
+Diverse useful functions: ring-filtering of the image, water descent, persistence diagram etc.
 """
 
 import math

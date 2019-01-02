@@ -54,9 +54,7 @@ def apply_mask(img, mask):
 
 
 def plot_img(img, title=""):
-    r"""
-    TODO
-    """
+    r"""Plot an image, and optionally add a title"""
     if len(img.shape) == 2:
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
     else:

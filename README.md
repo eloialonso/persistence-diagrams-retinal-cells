@@ -29,12 +29,10 @@ In images of retinal cells, we use persistence diagrams to classify a given pixe
 
 In the ring, consider the mapping *angle -> intensity* as a mountain relief, where the angle is the horizontal position and the intensity is the altitude. Fill this landscape with water until the highest mountain is covered up. Then, slowly empty the water and keep track of two events:
 
-- when a mountain emerges, like an island (the **birth** of the mountain)
-- when the water level is so low that two previously-separated islands merge together (the **death** of the smaller mountain)
+- the emergence of a mountain, like an island = the **birth** of the mountain
+- when the water level is low enough, the merging of two previously-separated islands = the **death** of the smaller mountain
 
-Then, represent each mountain in the persistence diagram as a point of coordinates [birth, death].
-
-### Building the persistence diagram
+Then, represent each mountain in the persistence diagram as a point [birth, death]. During the water descent, *noisy* peaks will emerge and quickly get merged with a higher peak: they have a small persistence. On the contrary, *major* peaks are characterized by a longer persistence. Therefore, in the persistence diagram, we found the noisy peaks close to the diagonal, and the major peaks farer from the diagonal. 
 
 <p align="center">
   <img alt="Intensity in the ring and corresponding persistence diagram" src="docs/persistence_diagram.png">
@@ -43,15 +41,11 @@ Then, represent each mountain in the persistence diagram as a point of coordinat
 *Left*: the intensity of the pixels in the ring as a function of their angle in the ring. 
 *Right*: the corresponding persistence diagram.
 
-Let *f* be the function plotted on the left (mapping angle to intensity). For a given intensity *x* in *[0, 255]*, we consider the **connected components** of the following set:
+A bit more formally, let *f* be the function plotted on the left (mapping angle to intensity). For a given intensity *x* in *[0, 255]*, we consider the **connected components** of the following set:
 
 <img src="docs/eq_preimage.svg" alt=""/>
 
 Then, we vary the intensity *x* from 255 down to 0, tracking the connected components at each step, recording their birth and their death. The persistence diagram is the graphical representation of a connected component's life: each point corresponds to a connected component, with coordinates [intensity of birth, intensity of death].
-
-### Analysis of the diagram
-
-
 
 ## Getting started
 

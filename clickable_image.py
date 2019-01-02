@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-TODO
+We define here ClickableImage, that stores an image and allows some clicking/selecting operations on it (for user interaction).  
 """
 
 import numpy as np
@@ -12,16 +12,12 @@ import matplotlib.pyplot as plt
 
 class ClickableImage:
 
-    def __init__(self, fname=None, other_my_image=None):
+    def __init__(self, fname):
+        r"""Clickable image, created from an image file.
+        Arguments:
+            fname (str): path to an image       
         """
-        TODO
-        """
-        # TODO remove
-        if other_my_image is not None:
-            for attribut in list(other_my_image.__dict__.keys()):
-                MyImage.__setattr__(self, attribut, other_my_image.__getattribute__(attribut))
-            return
-
+      
         self.fname = fname
 
         # load image and convert it from BGR to GRAY
@@ -39,7 +35,7 @@ class ClickableImage:
         self.points.append(self.point)
         return self.point
 
-    def get_point(self, n_point=1, title="Click on a point"): # TODO change name
+    def get_point(self, n_point=1, title="Click on a point"):
         r"""The user select a point with his mouse"""
         self.points = []
         fig = plt.figure()

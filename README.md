@@ -1,16 +1,29 @@
 <h1 align="center">
-  Topological Data Analysis for corner detection
+  Topological Data Analysis for Corner Detection in images of Retinal Cells
 </h1>
 
-Persistence diagrams to classify pixels as corners, edges, etc. in images of retinal cells.
-
-## Principle
-
-
+In images of retinal cells, we use persistence diagrams to classify a given pixel as a corner, an edge, etc.
 
 <p align="center">
   <img alt="Persistence diagram" src="docs/persistence.gif">
 </p>
+
+## Principle
+
+<p align="center">
+  <img alt="Image of cells, chosen point and ring" src="docs/ring.png">
+</p>
+
+**Goal**: classify the selected pixel (red) as belonging to a *corner*, an *edge* or simply *background*. 
+
+To do so, we consider the pixels of a ring (blue) centered on our point of interest. 
+
+<p align="center">
+  <img alt="Intensity in the ring and corresponding persistence diagram" src="docs/persistence_diagram.png">
+</p>
+
+*Left*: the intensity of the pixels in the ring as a function of their angular position in the ring. 
+*Right*: the corresponding persistence diagram.
 
 
 ## Getting started

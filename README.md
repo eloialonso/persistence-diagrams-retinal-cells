@@ -16,14 +16,23 @@ In images of retinal cells, we use persistence diagrams to classify a given pixe
 
 **Goal**: classify the selected pixel (red) as belonging to a *corner*, an *edge* or simply *background*. 
 
-**How**: we consider the pixels of a ring (blue) centered on our point of interest, and use the following set of rules: 
+**How**: we consider the intensity of the pixels (blue) located in a ring centered on our point of interest. Then, use the following set of rules: 
 - if the intensity in the ring has two main peaks, then our point belongs to an edge
 - if the intensity in the ring has three or more major peaks, our point belongs to a corner
 - else, our point belongs to background.
 
 **Difficulty**: given the intensity in the ring, define the concept of *major* peak of intensity, in order to distinguish them from the noisy peaks and to count them.
 
-**Approach**: in the ring, consider the mapping angle -> intensity as a moutain relief. Then, use *persistence* to quantitatively differentiate between noisy peaks and major peaks.   
+**Approach**: use *persistence* to quantitatively differentiate between noisy peaks and major peaks.   
+
+### Persistence Diagram intuition
+
+In the ring, consider the mapping *angle -> intensity* as a mountain relief, where the angle is the horizontal position and the intensity is the altitude. Fill this landscape with water until the highest mountain is covered up. Then, slowly empty the water and keep track of two events:
+
+- when a mountain emerges, like an island (the **birth** of the mountain)
+- when the water level is so low that two previously-separated islands merge together (the **death** of the smaller mountain)
+
+Then, represent each mountain in the persistence diagram as a point of coordinates [birth, death].
 
 ### Building the persistence diagram
 

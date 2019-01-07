@@ -38,7 +38,7 @@ Then, represent each mountain in the persistence diagram as a point [birth, deat
   <img alt="Intensity in the ring and corresponding persistence diagram" src="docs/persistence_diagram.png">
 </p>
 
-*Left*: the intensity of the pixels in the ring as a function of their angle in the ring. *Right*: the corresponding persistence diagram. **In this example, we count 4 major peaks and deduce that the point of interest in located on a corner**. 
+*Left*: the intensity of the pixels in the ring as a function of their angle in the ring. *Right*: the corresponding persistence diagram. **In this example, we count 4 major peaks and deduce that the point of interest is located on a corner**. 
 
 A bit more formally, let *f* be the function plotted on the left (mapping angle to intensity). For a given intensity *x* in *[0, 255]*, we consider the **connected components** of the following set:
 

@@ -1,15 +1,19 @@
 #! /usr/bin/env python
 # coding: utf-8
 
-"""
+
+r"""
 Diverse useful functions: ring-filtering of the image, water descent, persistence diagram etc.
 """
 
+
+import os
 import math
 import pickle
 from copy import deepcopy
 
 import cv2
+import imageio
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
@@ -201,32 +205,34 @@ def superimpose_ring_and_intersections(img, ring, angles, mask=None, alpha=8):
     return im_with_ring
 
 
-def water_descent(intensity2bucket, resolution):
+def water_descent(intensity2bucket, stride):
     r"""Performs the 'water descent' and stores the info/barcode of the peaks (birth/death)
-    TODO
+    Arguments:
+        intensity2bucket (dict)
+        stride (int)
     """
     ConnectedComponent.reset()
-    
+
     # Start from maximum intensity then decrease
     intensities = sorted(list(intensity2bucket.keys()))[::-1]
     for intensity in intensities:
-        
-        # Get all points for this intensity 
-        angles = intensity2bucket[intensity] 
+
+        # Get all points for this intensity
+        angles = intensity2bucket[intensity]
         for angle in angles:
             P = Point(x=angle, y=intensity, cc=[])
-            
+
             # Check if the point (angle, intensity) is close to the left / right border of the relief
             P_close_to_right = False
             P_close_to_left = False
-            if P.x - resolution < min(min(intensity2bucket.values())):  #P is close to left border
+            if P.x - stride < min(min(intensity2bucket.values())):  #P is close to left border
                 P_close_to_left = True
-            if P.x + resolution > max(max(intensity2bucket.values())):  #P is close to right border
+            if P.x + stride > max(max(intensity2bucket.values())):  #P is close to right border
                 P_close_to_right = True
-            
+
             # If P is close to an existing cc, add P to the cc
             for cc in ConnectedComponent.connected_components:
-                is_close, on_left, on_right = cc.is_close_to_point(P, resolution)
+                is_close, on_left, on_right = cc.is_close_to_point(P, stride)
                 if is_close:
                     P.belongs_to.append(cc)
                     cc.add_member(P, on_left=on_left, on_right=on_right)
@@ -238,32 +244,32 @@ def water_descent(intensity2bucket, resolution):
                     if cc.is_inversed:
                         continue
                     else:
-                        is_close, on_left, on_right = cc.is_close_to_point(P_shift, resolution)
+                        is_close, on_left, on_right = cc.is_close_to_point(P_shift, stride)
                         assert not (on_left or on_right)
                         if is_close:
                             P.belongs_to.append(cc)
                             cc.add_member(P, point_close_left=P_close_to_left, point_close_right=P_close_to_right)
             P.belongs_to = list(set(P.belongs_to))
-            
+
             # if P does not belong to any cc, create a new cc whose peak (and only member) is P
             if P.belongs_to == []:
                 cc = ConnectedComponent(peak=P, x_left=P.x, x_right=P.x, members=[P])
                 P.belongs_to.append(cc)
-                
-            # if P is close to different cc, merge the different connected components 
+
+            # if P is close to different cc, merge the different connected components
             elif len(P.belongs_to) >= 2:
                 cc = P.belongs_to[0]
                 for i in range(1,len(P.belongs_to)):
-                    cc = ConnectedComponent.union(cc, P.belongs_to[i], P.y, stride=resolution)
+                    cc = ConnectedComponent.union(cc, P.belongs_to[i], P.y, stride=stride)
                 P.belongs_to = [cc]
-           
+
     # At the end of the water descent, if there is more than one cc remaining, merge them together
     final_cc = ConnectedComponent.connected_components.copy()
     cc = final_cc[0]
     for i in range(1, len(final_cc)):
         try:
             print("Warning : connected component with peak ({}, {}) wasn't merge at the end".format(final_cc[i].peak.x, final_cc[i].peak.y))
-            cc = ConnectedComponent.union(cc, final_cc[i], intensity, stride=resolution)
+            cc = ConnectedComponent.union(cc, final_cc[i], intensity, stride=stride)
         except IndexError:
             print(i)
     ConnectedComponent.history[ConnectedComponent.connected_components[0]].append(intensity)
@@ -271,8 +277,6 @@ def water_descent(intensity2bucket, resolution):
     return ConnectedComponent.history
 
 
-# TODO: is it correct ? (orthogonal?)
-#Given the history, computes the 'orthogonal' life times of the peaks
 def compute_dist_to_diag(barcodes):
     r"""Compute distance of each cc (birth, death) to the diagonal (birth = death)"""
     history = np.array(list(barcodes.values()))
@@ -294,9 +298,7 @@ def get_peaks(barcodes, cut):
 
 
 def persistence_diagram(ax, barcodes, cut, intensity_of_interest=0):
-    r"""Visualization of barcodes with a persistence diagram
-    Arguments: TODO
-    """
+    r"""Visualization of barcodes with a persistence diagram"""
     dist_to_diag = compute_dist_to_diag(barcodes)
     # if cut == None:
         # cut = compute_cut(barcodes, dist_to_diag, threshold=intensity_of_interest, verbose=verbose)
@@ -321,4 +323,62 @@ def persistence_diagram(ax, barcodes, cut, intensity_of_interest=0):
     if peaks.size > 0:
         ax.scatter(peaks[:, 0], peaks[:, 1], c='brown', s=100)
     return ax
+
+
+def make_gif(outf, barcodes, cut, bucket2intensity, stride, size_smoothing, intensity_of_interest=0):
+    r"""Make persistence diagram gif"""
+
+    dist_to_diag = compute_dist_to_diag(barcodes)
+
+    peaks = np.array([v for cc, v in barcodes.items() if dist_to_diag[cc] > cut])
+    noise = np.array([v for cc, v in barcodes.items() if dist_to_diag[cc] <= cut])
+
+    y_min = np.min(list(barcodes.values()))
+    y_max = np.max(list(barcodes.values()))
+    if y_max < intensity_of_interest :
+        y_max = intensity_of_interest
+
+    # import pdb; pdb.set_trace()
+    all = np.array([v for cc, v in barcodes.items()])
+    all = all[all[:, 1].argsort()[::-1]] # sort by decreasing level of birth
+
+    angles = np.array(range(0, 360, stride))
+
+    # draw the successive persistence diagram
+    with imageio.get_writer(os.path.join(outf, "persistence.gif"), mode='I', duration=0.2) as writer:
+        for i in range(len(all)):
+            fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(16, 7.3))
+
+            current_intensity = all[i, 1]
+
+            # intensity relief in the ring
+            # ax1.plot(angles[bucket2intensity >= current_intensity], bucket2intensity[bucket2intensity >= current_intensity])
+            ax1.plot(angles, bucket2intensity, color='black')
+            ax1.set_xlim(0, 360)
+            ax1.add_patch(patches.Rectangle((0, y_min), 360, current_intensity - y_min, alpha=0.7))
+            ax1.set_xlabel("Angle in the ring (°)")
+            ax1.set_ylabel("Intensity in [0, 255]")
+            ax1.set_title("Intensity vs. Angle\nafter angular smoothing (size={}, stride={})".format(size_smoothing, stride))
+
+            # persistence diagram
+            ax2.set_aspect('equal')
+            ax2.set_xlim([y_min, y_max])
+            ax2.set_ylim([y_min, y_max])
+            ax2.plot([y_min + np.sqrt(2) * cut, y_max], [y_min, y_max - np.sqrt(2) * cut], 'r--')
+            ax2.add_patch(patches.Rectangle((y_min, y_min), y_max - y_min, y_max - y_min, alpha=0.1))
+            ax2.fill_between(x=np.arange(y_max, y_min, -0.1), y1=y_max, y2=np.arange(y_max, y_min, -0.1))
+            ax2.scatter(all[:i+1, 0], all[:i+1, 1], c='black', s=40)
+            ax2.set_xlabel("Birth intensity")
+            ax2.set_ylabel("Death intensity")
+
+            fig.canvas.draw()
+            img = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
+            img = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+            writer.append_data(img)
+            plt.close()
+
+        for _ in range(10):
+            writer.append_data(img)
+
+    return
 

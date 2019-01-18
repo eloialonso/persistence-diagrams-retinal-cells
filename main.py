@@ -18,7 +18,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from clickable_image import ClickableImage
-from utils import get_quantile, create_ring_mask, apply_mask, plot_img, simple_plot, superimpose_ring, superimpose_ring_and_intersections, angle2intensity_in_ring, angular_smoothing, water_descent, get_peaks, persistence_diagram
+from utils import get_quantile, create_ring_mask, apply_mask, plot_img, simple_plot, superimpose_ring, superimpose_ring_and_intersections, angle2intensity_in_ring, angular_smoothing, water_descent, get_peaks, persistence_diagram, make_gif
 
 
 def parse_arguments():
@@ -27,7 +27,7 @@ def parse_arguments():
     # out folder
     parser.add_argument("--outf", default="./out", type=str,
                         help="path to the experiment folder (default: './out')")
-    
+
     # source image
     parser.add_argument("--image", type=str, default="./images/real_image.tif",
         help="""path to the image to analyze""")
@@ -40,10 +40,6 @@ def parse_arguments():
     parser.add_argument("--thickness", type=int,
                         help="Thickness of the ring (default: (2/3)*radius)")
 
-    # Intensity ratio of interest
-    parser.add_argument("--intensity_interest", type=float, default=0.75,
-                        help="Intensity quantile above which a pixel can be considered as a potential center / edge (this is an 'a priori' to prevent running the costly analysis on every pixel of the dark background)")
-
     # Angular smoothing
     parser.add_argument("--size_smoothing", type=int, default=30,
                         help="Size of the sliding window for angular smoothing, in degree")
@@ -55,6 +51,10 @@ def parse_arguments():
                         help="min_lifetime (in persistence diagram) is heuristically computed as :\nmax(threshold, coef * range_intensity)\nwith range_intensity = max - min of the pixel values in the ring")
     parser.add_argument("--coef_min_lifetime", type=float, default=0.05,
                         help="min_lifetime (in persistence diagram) is heuristically computed as :\nmax(threshold, coef * range_intensity)\nwith range_intensity = max - min of the pixel values in the ring")
+
+    # No gif
+    parser.add_argument("--nogif", action="store_true",
+                        help="if specified, .gif file is not generated")
 
     return parser.parse_args()
 
@@ -83,9 +83,7 @@ def main():
 
     # Intensity of interest: intensity above which a pixel may be considered as a center / an edge
     # Assumption: centers and edges are brighter than background
-    # TODO remove if only one mode
-    assert args.intensity_interest >= 0 and args.intensity_interest <= 1, "--intensity_interest must be a float in [0, 1]"
-    intensity_of_interest = get_quantile(im.img, args.intensity_interest)
+    intensity_of_interest = get_quantile(im.img, 0.75)
 
     #
     # Ring
@@ -128,19 +126,6 @@ def main():
     #
     mask = create_ring_mask(im.img, ring)
     img_filtered = apply_mask(im.img, mask)
-
-    # dialog with the user # TODO is it really useful ? remove it if only one mode
-    max_intensity = np.max(img_filtered)
-    if max_intensity < intensity_of_interest:
-        print("\n/!\\ Ring not interesting : max_intensity {} is below the intensity of interest {}".format(max_intensity,intensity_of_interest))
-        keep_going = input("===> Do you want to run analysis nevertheless ? [Y/n]").lower() != "n"
-    elif im.img[center] < intensity_of_interest:
-        print("\n/!\\ Center not interesting : intensity {} is below the intensity of interest {}".format(im.img[center],intensity_of_interest))
-        keep_going = input("===> Do you want to run analysis nevertheless ? [Y/n]").lower() != "n"
-    else:
-        keep_going = True
-    if not keep_going:
-        return
 
     #
     # Visualization of the ring around the selected point
@@ -201,21 +186,21 @@ def main():
     # Visualization
     #
     fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(16, 7.3))
-    
-    # intensity relief in the ring 
+
+    # intensity relief in the ring
     ax1.plot(range(0, 360, args.stride_smoothing), bucket2intensity)
     ax1.set_xlim(0, 360)
     ax1.set_xlabel("Angle in the ring (°)")
     ax1.set_ylabel("Intensity in [0, 255]")
     ax1.set_title("Intensity vs. Angle\nafter angular smoothing (size={}, stride={})".format(args.size_smoothing, args.stride_smoothing))
-    
-    # corresponding persistence diagram 
+
+    # corresponding persistence diagram
     ax2 = persistence_diagram(ax2, barcodes, min_lifetime, intensity_of_interest)
     ax2.set_title("Persistence Diagram (with cut = {}) \nNumber of 'persistent' cc: {}".format(min_lifetime, n_peaks))
     ax2.set_xlabel("Birth intensity")
     ax2.set_ylabel("Death intensity")
     fig.savefig(os.path.join(args.outf, "persistence_diagram.png"), dpi=90, bbox_inches='tight')
-    
+
     #
     # classify the selected point
     #
@@ -225,8 +210,8 @@ def main():
         point_type = "edge"
     else:
         point_type = "background"
-    print("Point type: {} ({} peak(s))".format(point_type, n_peaks))
-    
+    print("\n==> Point type: {} ({} peak(s))".format(point_type, n_peaks))
+
     #
     # display detected edges
     #
@@ -238,7 +223,14 @@ def main():
         img_with_ring_and_intersections = superimpose_ring_and_intersections(im.img, ring, angles_of_edges, mask)
         fig, ax = plot_img(img_with_ring_and_intersections, title="Angles between horizontal and detected edges\n{}".format(sorted(angles_of_edges)))
         fig.savefig(os.path.join(args.outf, "edges.png"))
-    
+
+    #
+    # Make animated gif
+    #
+    if not args.nogif:
+        print("\nMaking animated gif...")
+        make_gif(args.outf, barcodes, min_lifetime, bucket2intensity, args.stride_smoothing, args.size_smoothing, intensity_of_interest)
+
     return
 
 

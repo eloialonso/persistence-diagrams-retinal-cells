@@ -1,8 +1,9 @@
 #! /usr/bin/env python
 # coding: utf-8
 
+
 """
-We define here ClickableImage, that stores an image and allows some clicking/selecting operations on it (for user interaction).  
+We define here ClickableImage, that stores an image and allows some clicking/selecting operations on it (for user interaction).
 """
 
 import numpy as np
@@ -15,9 +16,9 @@ class ClickableImage:
     def __init__(self, fname):
         r"""Clickable image, created from an image file.
         Arguments:
-            fname (str): path to an image       
+            fname (str): path to an image
         """
-      
+
         self.fname = fname
 
         # load image and convert it from BGR to GRAY

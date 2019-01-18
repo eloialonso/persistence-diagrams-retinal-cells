@@ -1,14 +1,16 @@
 #! /usr/bin/env python
 # coding: utf-8
 
+
+r"""
+We define here Point and ConnectedComponent. This second class contains
+the methods used during the water descent (to add new points to an existing cc, and merge two cc).
 """
-We define here Point and ConnectedComponent. This second class contains 
-the methods used during the water descent (to add new points to an existing cc, and merge two cc). 
-"""
+
 
 class Point:
     def __init__(self, x=0, y=0, cc=None):
-        """2D-Point that belongs to a particular connected component
+        r"""2D-Point that belongs to a particular connected component
         Arguments:
             x (int): x-position
             y (int): y-position
@@ -62,10 +64,10 @@ class ConnectedComponent:
             del cc
         cls.connected_components = []
         cls.history = {}
-    
+
     def add_member(self, point, point_close_left=False, point_close_right=False, on_left=False, on_right=False):
         r"""Add a new point to self, and update accordingly the attributes of self"""
-        
+
         # add the new point to the list of members of the cc
         self.members.append(point)
         self.members = list(set(self.members))
@@ -116,13 +118,13 @@ class ConnectedComponent:
             intensity: to store the death intensity of the lower cc
             stride: stride of the angular smoothing
         """
-        
+
         if cc1 == cc2:
             return cc1
-        
+
         # Identify which cc is higher than the other
         (cc_high, cc_low) = (cc1, cc2) if cc1.peak.y >= cc2.peak.y else (cc2, cc1)
-        
+
         case1 = False
         case2 = False
         if cc2.x_left - cc1.x_right <= 2 * stride:
@@ -133,7 +135,7 @@ class ConnectedComponent:
             case2 = cc1.is_inversed
         if (cc1.is_inversed or cc2.is_inversed) and not (case1 or case2):
             raise RuntimeError("Not expected: union of inversed peak without case1 and case2")
-        
+
         # Merge the lower cc in the higher cc
         cc_high.members = list(set(cc_high.members + cc_low.members))
         if case1:
@@ -155,14 +157,14 @@ class ConnectedComponent:
         else:
             cc_high.x_left = min(cc_high.x_left, cc_low.x_left)
             cc_high.x_right = max(cc_high.x_right, cc_low.x_right)
-        
+
         # Remove cc_low from the list of cc
         ConnectedComponent.connected_components = [x for x in ConnectedComponent.connected_components if x != cc_low]
-        
+
         # Register the death intensity of cc_low
         ConnectedComponent.history[cc_low].append(intensity)
-            
+
         return cc_high
 
 
-    
+

@@ -231,6 +231,8 @@ def main():
         print("\nMaking animated gif...")
         make_gif(args.outf, barcodes, min_lifetime, bucket2intensity, args.stride_smoothing, args.size_smoothing, intensity_of_interest)
 
+    print("Visualizations stored in {}".format(args.outf))
+    
     return
 
 

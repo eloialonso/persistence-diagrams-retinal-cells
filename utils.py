@@ -15,6 +15,7 @@ from copy import deepcopy
 import cv2
 import imageio
 import numpy as np
+from tqdm import tqdm
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
@@ -346,7 +347,7 @@ def make_gif(outf, barcodes, cut, bucket2intensity, stride, size_smoothing, inte
 
     # draw the successive persistence diagram
     with imageio.get_writer(os.path.join(outf, "persistence.gif"), mode='I', duration=0.2) as writer:
-        for i in range(len(all)):
+        for i in tqdm(range(len(all))):
             fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(16, 7.3))
 
             current_intensity = all[i, 1]

@@ -133,12 +133,12 @@ def main():
 
     # image filtered by the ring
     fig, ax = plot_img(img_filtered, title="Image filtered by the ring")
-    fig.savefig(os.path.join(args.outf, "img_filtered.png"))
+    fig.savefig(os.path.join(args.outf, "1_img_filtered.png"))
 
     # image with superimposed ring
     img_with_ring = superimpose_ring(im.img, ring, mask)
     fig, ax = plot_img(img_with_ring, title="Center : ({:.2f}, {:.2f}) \n Radius : ({:.2f}, {:.2f})".format(ring["center"][0], ring["center"][1], ring["radius"][0], ring["radius"][1]))
-    fig.savefig(os.path.join(args.outf, "ring.png"))
+    fig.savefig(os.path.join(args.outf, "2_ring.png"))
 
 
     #********************** STEP 2 **********************#
@@ -199,7 +199,7 @@ def main():
     ax2.set_title("Persistence Diagram (with cut = {}) \nNumber of 'persistent' cc: {}".format(min_lifetime, n_peaks))
     ax2.set_xlabel("Birth intensity")
     ax2.set_ylabel("Death intensity")
-    fig.savefig(os.path.join(args.outf, "persistence_diagram.png"), dpi=90, bbox_inches='tight')
+    fig.savefig(os.path.join(args.outf, "3_persistence_diagram.png"), dpi=90, bbox_inches='tight')
 
     #
     # classify the selected point
@@ -222,7 +222,7 @@ def main():
             angles_of_edges.append(angle_of_edge)
         img_with_ring_and_intersections = superimpose_ring_and_intersections(im.img, ring, angles_of_edges, mask)
         fig, ax = plot_img(img_with_ring_and_intersections, title="Angles between horizontal and detected edges\n{}".format(sorted(angles_of_edges)))
-        fig.savefig(os.path.join(args.outf, "edges.png"))
+        fig.savefig(os.path.join(args.outf, "4_edges.png"))
 
     #
     # Make animated gif
@@ -232,7 +232,7 @@ def main():
         make_gif(args.outf, barcodes, min_lifetime, bucket2intensity, args.stride_smoothing, args.size_smoothing, intensity_of_interest)
 
     print("Visualizations stored in {}".format(args.outf))
-    
+
     return
 
 

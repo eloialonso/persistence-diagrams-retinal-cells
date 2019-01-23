@@ -77,7 +77,7 @@ This will display a default image of cells. Select a point to run the analysis o
 
 ### GIF
 
-The generation of the GIF file is slow, run `python main.py --nogif` if are not interested in this animation. 
+The generation of the GIF file is slow, run `python main.py --nogif` if you are not interested in this animation. 
 
 ### Options
 

@@ -11,7 +11,7 @@ In images of retinal cells, we use persistence diagrams to classify a given pixe
 <p align="center">
   <a href="#principle">Principle</a> •
   <a href="#persistence-diagram">Persistence Diagram</a> •
-  <a href="#Getting started">Getting started</a>
+  <a href="#getting-started">Getting started</a>
 </p>
 
 

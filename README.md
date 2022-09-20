@@ -1,14 +1,36 @@
 #  Persistence diagrams for corner detection in images of retinal cells
 
 <p align="left">
+  <a href="#getting-started">Getting started</a> •
   <a href="#principle">Principle</a> •
-  <a href="#persistence-diagram">Persistence Diagram</a> •
-  <a href="#getting-started">Getting started</a>
+  <a href="#persistence-diagram">Persistence Diagram</a>
 </p>
 
 <p align="center">
   <img alt="Persistence diagram" src="docs/persistence.gif">
 </p>
+
+## Getting started
+
+Dependencies are in `requirements.txt`. 
+
+**Basic use**
+
+```bash
+python main.py
+```
+
+This will display a default image of cells. Select a point to run the analysis on. The output images are stored in `out/`. 
+
+**Disable GIF**
+
+```bash
+python main.py --nogif
+``` 
+
+**Options**
+
+It is possible to change the default image, the default values of the hyper parameters (shape of the ring, minimum persistence to separate noisy peaks vs. major peaks etc.). Enter `python main.py -h` for details.
 
 ## Principle
 
@@ -51,41 +73,4 @@ In the ring, consider the mapping *angle -> intensity* as a mountain relief, whe
 
 Then, represent each mountain in the persistence diagram as a point [birth, death]. During the water descent, *noisy* peaks will emerge and quickly be merged with a higher peak: they have a small persistence. On the contrary, *major* peaks are characterized by a longer persistence. Therefore, in the persistence diagram, we found the noisy peaks close to the diagonal, and the major peaks further away from the diagonal. 
 
-
-## Getting started
-
-### Installation
-
-- Clone the project
-```bash
-git clone https://github.com/bloodymosquito/tda-retinal-cells
-```
-
-- Create a virtual environment (optional)
-```bash
-virtualenv -p python3 <location_of_the_new_virtualenv>
-source <location_of_the_new_virtualenv>/bin/activate
-```
-
-- Install the necessary packages (numpy, matplotlib, opencv)
-```bash
-cd tda-retinal-cells
-pip install -r requirements.txt
-```
-
-### Basic use
-
-```bash
-python main.py
-```
-
-This will display a default image of cells. Select a point to run the analysis on. The output images are stored in `./out/`. 
-
-### GIF
-
-The generation of the GIF file is slow, run `python main.py --nogif` if you are not interested in this animation. 
-
-### Options
-
-It is possible to change the default image, the default values of the hyper parameters (shape of the ring, minimum persistence to separate noisy peaks vs. major peaks etc.). Enter `python main.py -h` for details.
 

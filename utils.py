@@ -320,9 +320,9 @@ def persistence_diagram(ax, barcodes, cut, intensity_of_interest=0):
     ax.add_patch(patches.Rectangle((y_min, y_min), y_max - y_min, y_max - y_min, alpha=0.1))
     ax.fill_between(x=np.arange(y_max, y_min, -0.1), y1=y_max, y2=np.arange(y_max, y_min, -0.1))
     if noise.size > 0:
-        ax.scatter(noise[:, 0], noise[:, 1], c='black', s=40)
+        ax.scatter(noise[:, 0], noise[:, 1], c='black', s=50)
     if peaks.size > 0:
-        ax.scatter(peaks[:, 0], peaks[:, 1], c='brown', s=100)
+        ax.scatter(peaks[:, 0], peaks[:, 1], c='brown', s=150)
     return ax
 
 
@@ -340,17 +340,17 @@ def make_gif(outf, barcodes, cut, bucket2intensity, stride, size_smoothing, inte
         y_max = intensity_of_interest
 
     # import pdb; pdb.set_trace()
-    all = np.array([v for cc, v in barcodes.items()])
-    all = all[all[:, 1].argsort()[::-1]] # sort by decreasing level of birth
+    all_ = np.array([v for cc, v in barcodes.items()])
+    all_ = all_[all_[:, 1].argsort()[::-1]] # sort by decreasing level of birth
 
     angles = np.array(range(0, 360, stride))
 
     # draw the successive persistence diagram
-    with imageio.get_writer(os.path.join(outf, "persistence.gif"), mode='I', duration=0.2) as writer:
-        for i in tqdm(range(len(all))):
+    with imageio.get_writer(os.path.join(outf, "persistence.gif"), mode='I', duration=0.05) as writer:
+        for i in tqdm(range(len(all_))):
             fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(16, 7.3))
 
-            current_intensity = all[i, 1]
+            current_intensity = all_[i, 1]
 
             # intensity relief in the ring
             # ax1.plot(angles[bucket2intensity >= current_intensity], bucket2intensity[bucket2intensity >= current_intensity])
@@ -359,7 +359,6 @@ def make_gif(outf, barcodes, cut, bucket2intensity, stride, size_smoothing, inte
             ax1.add_patch(patches.Rectangle((0, y_min), 360, current_intensity - y_min, alpha=0.7))
             ax1.set_xlabel("Angle in the ring (°)")
             ax1.set_ylabel("Intensity in [0, 255]")
-            ax1.set_title("Intensity vs. Angle\nafter angular smoothing (size={}, stride={})".format(size_smoothing, stride))
 
             # persistence diagram
             ax2.set_aspect('equal')
@@ -368,9 +367,22 @@ def make_gif(outf, barcodes, cut, bucket2intensity, stride, size_smoothing, inte
             ax2.plot([y_min + np.sqrt(2) * cut, y_max], [y_min, y_max - np.sqrt(2) * cut], 'r--')
             ax2.add_patch(patches.Rectangle((y_min, y_min), y_max - y_min, y_max - y_min, alpha=0.1))
             ax2.fill_between(x=np.arange(y_max, y_min, -0.1), y1=y_max, y2=np.arange(y_max, y_min, -0.1))
-            ax2.scatter(all[:i+1, 0], all[:i+1, 1], c='black', s=40)
+            
+            peaks_ = np.array([x for x in all_[:i + 1] if x in peaks])
+            noise_ = np.array([x for x in all_[:i + 1] if x in noise])
+            #import pdb; pdb.set_trace()
+            #ax2.scatter(toplot[:, 0], toplot[:i+1, 1], c='black', s=40)
+            if len(peaks_) > 0:
+                ax2.scatter(peaks_[:, 0], peaks_[:, 1], c='brown', s=150)
+            if len(noise_) > 0:
+                ax2.scatter(noise_[:, 0], noise_[:, 1], c='black', s=50)
             ax2.set_xlabel("Birth intensity")
             ax2.set_ylabel("Death intensity")
+
+            if i == len(all_) - 1:
+                for p in peaks_:
+                    circle = plt.Circle((p[0], p[1]), 5, color='b', fill=False)
+                    ax2.add_patch(circle)
 
             fig.canvas.draw()
             img = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
@@ -378,7 +390,7 @@ def make_gif(outf, barcodes, cut, bucket2intensity, stride, size_smoothing, inte
             writer.append_data(img)
             plt.close()
 
-        for _ in range(10):
+        for _ in range(60):
             writer.append_data(img)
 
     return

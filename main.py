@@ -138,7 +138,7 @@ def main():
     # image with superimposed ring
     img_with_ring = superimpose_ring(im.img, ring, mask)
     fig, ax = plot_img(img_with_ring, title="Center : ({:.2f}, {:.2f}) \n Radius : ({:.2f}, {:.2f})".format(ring["center"][0], ring["center"][1], ring["radius"][0], ring["radius"][1]))
-    fig.savefig(os.path.join(args.outf, "2_ring.png"))
+    fig.savefig(os.path.join(args.outf, "2_ring.png"), bbox_inches="tight")
 
 
     #********************** STEP 2 **********************#
@@ -192,11 +192,11 @@ def main():
     ax1.set_xlim(0, 360)
     ax1.set_xlabel("Angle in the ring (°)")
     ax1.set_ylabel("Intensity in [0, 255]")
-    ax1.set_title("Intensity vs. Angle\nafter angular smoothing (size={}, stride={})".format(args.size_smoothing, args.stride_smoothing))
+    ax1.set_title("Intensity vs. Angle")
 
     # corresponding persistence diagram
     ax2 = persistence_diagram(ax2, barcodes, min_lifetime, intensity_of_interest)
-    ax2.set_title("Persistence Diagram (with cut = {}) \nNumber of 'persistent' cc: {}".format(min_lifetime, n_peaks))
+    ax2.set_title(f"Persistence Diagram - {n_peaks} persistent CCs")
     ax2.set_xlabel("Birth intensity")
     ax2.set_ylabel("Death intensity")
     fig.savefig(os.path.join(args.outf, "3_persistence_diagram.png"), dpi=90, bbox_inches='tight')

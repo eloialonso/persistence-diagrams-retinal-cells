@@ -7,10 +7,7 @@ Diverse useful functions: ring-filtering of the image, water descent, persistenc
 """
 
 
-import os
 import math
-import pickle
-from copy import deepcopy
 
 import cv2
 import imageio
@@ -19,7 +16,8 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-from cc import ConnectedComponent, Point
+from connected_component import ConnectedComponent
+from point import Point
 
 
 def get_quantile(image, perc):
@@ -293,7 +291,6 @@ def get_peaks(barcodes, cut):
     r"""Select the barcodes with lifetime > cut"""
     peaks = []
     dist_to_diag = compute_dist_to_diag(barcodes)
-    distances = np.array(list(dist_to_diag.values()))
     peaks = [cc for cc in barcodes if dist_to_diag[cc] > cut]
     return peaks
 
@@ -301,9 +298,7 @@ def get_peaks(barcodes, cut):
 def persistence_diagram(ax, barcodes, cut, intensity_of_interest=0):
     r"""Visualization of barcodes with a persistence diagram"""
     dist_to_diag = compute_dist_to_diag(barcodes)
-    # if cut == None:
-        # cut = compute_cut(barcodes, dist_to_diag, threshold=intensity_of_interest, verbose=verbose)
-
+    
     peaks = np.array([v for cc, v in barcodes.items() if dist_to_diag[cc] > cut])
     noise = np.array([v for cc, v in barcodes.items() if dist_to_diag[cc] <= cut])
 
@@ -326,34 +321,35 @@ def persistence_diagram(ax, barcodes, cut, intensity_of_interest=0):
     return ax
 
 
-def make_gif(outf, barcodes, cut, bucket2intensity, stride, size_smoothing, intensity_of_interest=0):
+def make_gif(outf, barcodes, cut, bucket2intensity, stride, intensity_of_interest=0):
     r"""Make persistence diagram gif"""
 
     dist_to_diag = compute_dist_to_diag(barcodes)
 
-    peaks = np.array([v for cc, v in barcodes.items() if dist_to_diag[cc] > cut])
-    noise = np.array([v for cc, v in barcodes.items() if dist_to_diag[cc] <= cut])
+    ccs = list(barcodes.keys())
+    all_ = np.array(list(barcodes.values()))
 
+    idxs = all_[:, 1].argsort()[::-1] # sort by decreasing level of birth
+    all_ = all_[idxs] 
+    ccs = list(barcodes.keys())
+    ccs = [ccs[i] for i in idxs]
+    is_peak = np.array([dist_to_diag[cc] > cut for cc in ccs])
+    
     y_min = np.min(list(barcodes.values()))
     y_max = np.max(list(barcodes.values()))
     if y_max < intensity_of_interest :
         y_max = intensity_of_interest
 
-    # import pdb; pdb.set_trace()
-    all_ = np.array([v for cc, v in barcodes.items()])
-    all_ = all_[all_[:, 1].argsort()[::-1]] # sort by decreasing level of birth
-
     angles = np.array(range(0, 360, stride))
 
     # draw the successive persistence diagram
-    with imageio.get_writer(os.path.join(outf, "persistence.gif"), mode='I', duration=0.05) as writer:
-        for i in tqdm(range(len(all_))):
+    with imageio.get_writer(outf / "persistence_diagram.gif", mode='I', duration=0.05) as writer:
+        for i in tqdm(range(len(all_)), desc="Generating GIF"):
             fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(16, 7.3))
 
             current_intensity = all_[i, 1]
 
             # intensity relief in the ring
-            # ax1.plot(angles[bucket2intensity >= current_intensity], bucket2intensity[bucket2intensity >= current_intensity])
             ax1.plot(angles, bucket2intensity, color='black')
             ax1.set_xlim(0, 360)
             ax1.add_patch(patches.Rectangle((0, y_min), 360, current_intensity - y_min, alpha=0.7))
@@ -368,19 +364,19 @@ def make_gif(outf, barcodes, cut, bucket2intensity, stride, size_smoothing, inte
             ax2.add_patch(patches.Rectangle((y_min, y_min), y_max - y_min, y_max - y_min, alpha=0.1))
             ax2.fill_between(x=np.arange(y_max, y_min, -0.1), y1=y_max, y2=np.arange(y_max, y_min, -0.1))
             
-            peaks_ = np.array([x for x in all_[:i + 1] if x in peaks])
-            noise_ = np.array([x for x in all_[:i + 1] if x in noise])
-            #import pdb; pdb.set_trace()
-            #ax2.scatter(toplot[:, 0], toplot[:i+1, 1], c='black', s=40)
-            if len(peaks_) > 0:
-                ax2.scatter(peaks_[:, 0], peaks_[:, 1], c='brown', s=150)
-            if len(noise_) > 0:
-                ax2.scatter(noise_[:, 0], noise_[:, 1], c='black', s=50)
+            peaks = all_[:i+1][is_peak[:i+1]]
+            noise = all_[:i+1][np.logical_not(is_peak[:i+1])]
+
+            if len(peaks) > 0:
+                ax2.scatter(peaks[:, 0], peaks[:, 1], c='brown', s=150)
+            if len(noise) > 0:
+                ax2.scatter(noise[:, 0], noise[:, 1], c='black', s=50)
+            
             ax2.set_xlabel("Birth intensity")
             ax2.set_ylabel("Death intensity")
 
             if i == len(all_) - 1:
-                for p in peaks_:
+                for p in peaks:
                     circle = plt.Circle((p[0], p[1]), 5, color='b', fill=False)
                     ax2.add_patch(circle)
 

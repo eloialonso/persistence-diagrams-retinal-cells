@@ -1,36 +1,23 @@
-#! /usr/bin/env python
-# coding: utf-8
-
-"""
-- Context: the user selects a point to analyze on an image of cells (bright edges on dark background).
-- Goal: we want to classify the selected point as a corner/t-junction, an edge or background.
-- Method: we analyze of a circular region around the point of interest, in order to count the number of
-surrounding edges. To do so, we track the pixel values in a ring around the point and we want to
-count the number of peaks of intensity (since edges are brighter). To be robust to noise, we compute a
-persistence diagram to distinguish between the 'real' peaks and the 'noise' peaks.
-"""
-
 import argparse
-import os
 import math
+from pathlib import Path
 
-import numpy as np
 import matplotlib.pyplot as plt
 
 from clickable_image import ClickableImage
-from utils import get_quantile, create_ring_mask, apply_mask, plot_img, simple_plot, superimpose_ring, superimpose_ring_and_intersections, angle2intensity_in_ring, angular_smoothing, water_descent, get_peaks, persistence_diagram, make_gif
+from utils import angle2intensity_in_ring, angular_smoothing, apply_mask, create_ring_mask, get_quantile, get_peaks, make_gif, persistence_diagram, plot_img, superimpose_ring, superimpose_ring_and_intersections, water_descent
 
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="tda for corner detection in retinal cells images", formatter_class=argparse.RawTextHelpFormatter)
 
     # out folder
-    parser.add_argument("--outf", default="./out", type=str,
-                        help="path to the experiment folder (default: './out')")
+    parser.add_argument("--outf", default=Path("out"), type=Path, 
+                        help="path to the experiment folder.")
 
     # source image
-    parser.add_argument("--image", type=str, default="./images/real_image.tif",
-        help="""path to the image to analyze""")
+    parser.add_argument("--image", type=Path, default=Path("images/real_image.tif"),
+                        help="path to the image to analyze")
 
     # Ring
     parser.add_argument("--radius", type=int, default=6,
@@ -53,30 +40,17 @@ def parse_arguments():
                         help="min_lifetime (in persistence diagram) is heuristically computed as :\nmax(threshold, coef * range_intensity)\nwith range_intensity = max - min of the pixel values in the ring")
 
     # No gif
-    parser.add_argument("--nogif", action="store_true",
-                        help="if specified, .gif file is not generated")
+    parser.add_argument("--gif", action="store_true",
+                        help="if specified, .gif file is generated.")
 
     return parser.parse_args()
 
 
 def main():
 
-    #
-    # parse command line
-    #
     args = parse_arguments()
-
-    #
-    # create out folder
-    #
-    if not os.path.exists(args.outf):
-        os.makedirs(args.outf)
-
-    #
-    # load image
-    #
-    if not os.path.exists(args.image):
-        raise FileNotFoundError(args.image)
+    
+    args.outf.mkdir(exist_ok=True, parents=True)
     im = ClickableImage(args.image)
 
     # ******************* PARAMETERS ******************************************
@@ -92,7 +66,7 @@ def main():
     # - thickness: if --thickness is not specified, we use (2/3)*radius
     if args.typical_edge == "measure_an_edge":
         typical_edge_length = im.measure_an_edge()
-        print("You selected an edge of length : {}".format(typical_edge_length))
+        print(f"You selected an edge of length : {typical_edge_length}")
         radius = math.ceil(typical_edge_length * 0.6)
     elif args.typical_edge == "count_cells":
         n_cells = im.count_cells()
@@ -109,7 +83,7 @@ def main():
     #
     center = im.get_point()
     center = (math.ceil(center[0]), math.ceil(center[1]))
-    print("Selected point: {}".format(center))
+    print(f"Selected point: {center}")
 
     #************************** STEP 1 ****************************#
     # Filter the image with a ring centered on the point of interest
@@ -133,12 +107,12 @@ def main():
 
     # image filtered by the ring
     fig, ax = plot_img(img_filtered, title="Image filtered by the ring")
-    fig.savefig(os.path.join(args.outf, "1_img_filtered.png"))
+    fig.savefig(args.outf / "1_img_filtered.png", bbox_inches="tight")
 
     # image with superimposed ring
     img_with_ring = superimpose_ring(im.img, ring, mask)
-    fig, ax = plot_img(img_with_ring, title="Center : ({:.2f}, {:.2f}) \n Radius : ({:.2f}, {:.2f})".format(ring["center"][0], ring["center"][1], ring["radius"][0], ring["radius"][1]))
-    fig.savefig(os.path.join(args.outf, "2_ring.png"), bbox_inches="tight")
+    fig, ax = plot_img(img_with_ring, title=f"Center : ({ring['center'][0]:.2f}, {ring['center'][1]:.2f}) \n Radius : ({ring['radius'][0]:.2f}, {ring['radius'][1]:.2f})")
+    fig.savefig(args.outf / "2_ring.png", bbox_inches="tight")
 
 
     #********************** STEP 2 **********************#
@@ -199,7 +173,7 @@ def main():
     ax2.set_title(f"Persistence Diagram - {n_peaks} persistent CCs")
     ax2.set_xlabel("Birth intensity")
     ax2.set_ylabel("Death intensity")
-    fig.savefig(os.path.join(args.outf, "3_persistence_diagram.png"), dpi=90, bbox_inches='tight')
+    fig.savefig(args.outf / "3_persistence_diagram.png", dpi=90, bbox_inches='tight')
 
     #
     # classify the selected point
@@ -210,7 +184,7 @@ def main():
         point_type = "edge"
     else:
         point_type = "background"
-    print("\n==> Point type: {} ({} peak(s))".format(point_type, n_peaks))
+    print(f"\n==> Point type: {point_type} ({n_peaks} peak(s))")
 
     #
     # display detected edges
@@ -221,17 +195,16 @@ def main():
             angle_of_edge = cc.peak.x
             angles_of_edges.append(angle_of_edge)
         img_with_ring_and_intersections = superimpose_ring_and_intersections(im.img, ring, angles_of_edges, mask)
-        fig, ax = plot_img(img_with_ring_and_intersections, title="Angles between horizontal and detected edges\n{}".format(sorted(angles_of_edges)))
-        fig.savefig(os.path.join(args.outf, "4_edges.png"))
+        fig, ax = plot_img(img_with_ring_and_intersections, title=f"Angles between horizontal and detected edges\n{sorted(angles_of_edges)}")
+        fig.savefig(args.outf / "4_edges.png")
 
     #
     # Make animated gif
     #
-    if not args.nogif:
-        print("\nMaking animated gif...")
-        make_gif(args.outf, barcodes, min_lifetime, bucket2intensity, args.stride_smoothing, args.size_smoothing, intensity_of_interest)
+    if args.gif:
+        make_gif(args.outf, barcodes, min_lifetime, bucket2intensity, args.stride_smoothing, intensity_of_interest)
 
-    print("Visualizations stored in {}".format(args.outf))
+    print(f"Visualizations stored in '{args.outf}'.")
 
     return
 

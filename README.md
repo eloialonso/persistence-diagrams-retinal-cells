@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <img alt="Persistence diagram" src="docs/persistence.gif">
+  <img alt="Persistence diagram" src="docs/persistence_diagram.gif">
 </p>
 
 ## Getting started
@@ -22,11 +22,13 @@ python main.py
 
 This will display a default image of cells. Select a point to run the analysis on. The output images are stored in `out/`. 
 
-**Disable GIF**
+**GIF of animated persistence diagram**
 
 ```bash
-python main.py --nogif
+python main.py --gif
 ``` 
+
+The GIF is stored at `out/persistence_diagram.gif`.
 
 **Options**
 

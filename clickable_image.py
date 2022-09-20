@@ -1,27 +1,13 @@
-#! /usr/bin/env python
-# coding: utf-8
-
-
-"""
-We define here ClickableImage, that stores an image and allows some clicking/selecting operations on it (for user interaction).
-"""
-
-import numpy as np
 import cv2
+import numpy as np
 import matplotlib.pyplot as plt
 
 
 class ClickableImage:
 
     def __init__(self, fname):
-        r"""Clickable image, created from an image file.
-        Arguments:
-            fname (str): path to an image
-        """
 
-        self.fname = fname
-
-        # load image and convert it from BGR to GRAY
+        self.fname = str(fname)
         self.img = cv2.cvtColor(cv2.imread(self.fname), cv2.COLOR_BGR2GRAY)
 
         self.point = ()

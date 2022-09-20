@@ -1,39 +1,12 @@
-#! /usr/bin/env python
-# coding: utf-8
-
-
-r"""
-We define here Point and ConnectedComponent. This second class contains
-the methods used during the water descent (to add new points to an existing cc, and merge two cc).
-"""
-
-
-class Point:
-    def __init__(self, x=0, y=0, cc=None):
-        r"""2D-Point that belongs to a particular connected component
-        Arguments:
-            x (int): x-position
-            y (int): y-position
-            cc (ConnectedComponent): cc the Point belongs to
-        """
-        self.x = x
-        self.y = y
-        if cc is None:
-            self.belongs_to = []
-        else:
-            self.belongs_to = cc
-
-    def __repr__(self):
-        return "({}, {})".format(self.x, self.y)
+from point import Point
 
 
 class ConnectedComponent:
 
-    # Class attributes
     connected_components = []   # to store all the created connected components
     history = {}                # to store the birth/death events of all connected components
 
-    def __init__(self, peak=Point(), x_left=0, x_right=0, members=[]):
+    def __init__(self, peak, x_left, x_right, members=None):
         r"""Connected component
         Arguments:
             peak (Point): highest point
@@ -45,9 +18,11 @@ class ConnectedComponent:
         self.x_left = x_left
         self.x_right = x_right
         self.is_inversed = x_left > x_right
-        self.members = members
-        if members == []:
-            self.members.append(self.peak)
+        
+        if members is None:
+            self.members = [self.peak]
+        else:
+            self.members = members
 
         # Update the two class attributes
         self.connected_components.append(self)  # Add this new cc to the list of cc

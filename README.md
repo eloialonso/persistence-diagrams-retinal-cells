@@ -1,19 +1,14 @@
-<h1 align="center">
-  Topological Data Analysis for Corner Detection in images of Retinal Cells
-</h1>
+#  Persistence diagrams for corner detection in images of retinal cells
 
-In images of retinal cells, we use persistence diagrams to classify a given pixel as a corner, an edge, etc.
-
-<p align="center">
-  <img alt="Persistence diagram" src="docs/persistence.gif">
-</p>
-
-<p align="center">
+<p align="left">
   <a href="#principle">Principle</a> •
   <a href="#persistence-diagram">Persistence Diagram</a> •
   <a href="#getting-started">Getting started</a>
 </p>
 
+<p align="center">
+  <img alt="Persistence diagram" src="docs/persistence.gif">
+</p>
 
 ## Principle
 
@@ -23,35 +18,39 @@ In images of retinal cells, we use persistence diagrams to classify a given pixe
 
 **Goal**: classify the selected pixel (red) as belonging to a *corner*, an *edge* or simply *background*. 
 
-**How**: we consider the intensity of the pixels (blue) located in a ring centered on our point of interest. Then, use the following set of rules: 
+We use persistence diagrams to count the number of peaks of significant intensity in the blue ring around the selected pixel.
+
+We then apply the following classification rule: 
 - if the intensity in the ring has two main peaks, then our point belongs to an edge
 - if the intensity in the ring has three or more major peaks, our point belongs to a corner
 - else, our point belongs to background.
-
-**Difficulty**: define the idea of a *major* peak of intensity (versus a *noisy* peak).
-
-**Approach**: use *persistence* to quantitatively differentiate between noisy peaks and major peaks.   
+  
 
 ## Persistence Diagram
-
-In the ring, consider the mapping *angle -> intensity* as a mountain relief, where the angle is the horizontal position and the intensity is the altitude. Fill this landscape with water until the highest mountain is covered up. Then, slowly empty the water and keep track of two events:
-
-- the emergence of a mountain, like an island = the **birth** of the mountain
-- when the water level is low enough, the merging of two previously-separated islands = the **death** of the smaller mountain
-
-Then, represent each mountain in the persistence diagram as a point [birth, death]. During the water descent, *noisy* peaks will emerge and quickly get merged with a higher peak: they have a small persistence. On the contrary, *major* peaks are characterized by a longer persistence. Therefore, in the persistence diagram, we found the noisy peaks close to the diagonal, and the major peaks farer from the diagonal. 
 
 <p align="center">
   <img alt="Intensity in the ring and corresponding persistence diagram" src="docs/persistence_diagram.png">
 </p>
 
-*Left*: the intensity of the pixels in the ring as a function of their angle in the ring. *Right*: the corresponding persistence diagram. **In this example, we count 4 major peaks and deduce that the point of interest is located on a corner**. 
+**Left**: The intensity of the pixels in the ring as a function of their angle in the ring. **Right**: The corresponding persistence diagram. 
 
-A bit more formally, let *f* be the function plotted on the left (mapping angle to intensity). For a given intensity *x* in *[0, 255]*, we consider the **connected components** of the following set:
+Let $f:[0, 360] \rightarrow [0, 255]$ be the function mapping angle to intensity (left plot). For a given intensity *y* in *[0, 255]*, we consider the **connected components** (CCs) of the preimage set { $x \in [0, 360]: f(x) \in [y, +\infty)$ }.
 
-<img src="docs/eq_preimage.svg" alt=""/>
+We then vary the intensity $y$ from 255 down to 0. At each step, we compute the CCs of the preimage and keep track of the intensity at which each CC appears ( $y_{birth}$ ) and disappears ( $y_{death}$ ). The persistence diagram is the graphical representation of these events: each CC is a plotted as a point with coordinates $[y_{birth}, y_{death}]$.
 
-Then, we vary the intensity *x* from 255 down to 0, tracking the connected components at each step, recording their birth and their death. The persistence diagram is the graphical representation of a connected component's life: each point corresponds to a connected component, with coordinates [intensity of birth, intensity of death].
+> In the example above, the persistence diagram shows that 4 CCs have a significant lifetime. We then apply the classification rule and deduce that the point of interest is located on a corner (4 major intensity peaks).
+
+---
+
+**Intuitive view of persistence diagrams** 
+
+In the ring, consider the mapping *angle -> intensity* as a mountain relief, where the angle is the horizontal position and the intensity is the altitude. Fill this landscape with water until the highest mountain is covered up. Then, slowly empty the water and keep track of two events:
+
+- The *birth* of a mountain: the water level when it first emerges.
+- The *death* of a mountain: the water level when it merges with another moutain (when the level becomes too low to separate the two islands). 
+
+Then, represent each mountain in the persistence diagram as a point [birth, death]. During the water descent, *noisy* peaks will emerge and quickly be merged with a higher peak: they have a small persistence. On the contrary, *major* peaks are characterized by a longer persistence. Therefore, in the persistence diagram, we found the noisy peaks close to the diagonal, and the major peaks further away from the diagonal. 
+
 
 ## Getting started
 

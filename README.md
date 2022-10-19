@@ -17,7 +17,7 @@ Dependencies are in `requirements.txt`.
 **Basic use**
 
 ```bash
-python main.py
+python src/main.py
 ```
 
 This will display a default image of cells. Select a point to run the analysis on. The output images are stored in `out/`. 
@@ -25,14 +25,12 @@ This will display a default image of cells. Select a point to run the analysis o
 **GIF of animated persistence diagram**
 
 ```bash
-python main.py --gif
+python src/main.py --gif
 ``` 
 
 The GIF is stored at `out/persistence_diagram.gif`.
 
-**Options**
-
-It is possible to change the default image, the default values of the hyper parameters (shape of the ring, minimum persistence to separate noisy peaks vs. major peaks etc.). Enter `python main.py -h` for details.
+See `python src/main.py -h` for available options (change the image, hyperparameters values, etc).
 
 ## Principle
 

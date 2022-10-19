@@ -12,7 +12,7 @@
 
 ## Getting started
 
-Dependencies are in `requirements.txt`. 
+Dependencies are in [requirements.txt](requirements.txt). 
 
 **Basic use**
 
@@ -64,13 +64,19 @@ We then vary the intensity $y$ from 255 down to 0. At each step, we compute the 
 
 ---
 
-**Intuitive view of persistence diagrams** 
+**Intuition of persistence diagrams** 
 
-In the ring, consider the mapping *angle -> intensity* as a mountain relief, where the angle is the horizontal position and the intensity is the altitude. Fill this landscape with water until the highest mountain is covered up. Then, slowly empty the water and keep track of two events:
+In the ring, consider the mapping `angle --> intensity` as a mountain relief, where the angle is the horizontal position and the intensity is the altitude. 
 
-- The *birth* of a mountain: the water level when it first emerges.
-- The *death* of a mountain: the water level when it merges with another moutain (when the level becomes too low to separate the two islands). 
+Fill this landscape with water until the highest mountain is covered up. Then, slowly empty the water and keep track of two events:
 
-Then, represent each mountain in the persistence diagram as a point [birth, death]. During the water descent, *noisy* peaks will emerge and quickly be merged with a higher peak: they have a small persistence. On the contrary, *major* peaks are characterized by a longer persistence. Therefore, in the persistence diagram, we found the noisy peaks close to the diagonal, and the major peaks further away from the diagonal. 
+- The `birth` of a mountain: the water level when it first emerges.
+- The `death` of a mountain: the water level when it merges with another moutain (when the level becomes too low to separate the two islands).
+
+We plot these two events in the persistence diagram, where each mountain is graphically representation as a point `[birth, death]`.
+
+> Intuitively, during the water descent, *noisy* peaks will emerge and quickly be merged with a higher peak: they have a small persistence. On the contrary, *major* peaks are characterized by a longer persistence.
+
+Therefore, noisy peaks end up close to the diagonal, while major peaks lay further away from it. 
 
 
